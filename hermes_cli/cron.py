@@ -116,7 +116,10 @@ def cron_list(show_all: bool = False):
     for job in jobs:
         job_id = job.get("id", "?")
         name = job.get("name", "(unnamed)")
-        schedule = job.get("schedule_display", job.get("schedule", {}).get("value", "?"))
+        # `.get(key, default)` evaluates the default eagerly, so chaining
+        # `.get("value")` crashes when `schedule` is a plain string. list_jobs
+        # already normalizes schedule_display; just coalesce null/empty.
+        schedule = job.get("schedule_display") or "?"
         state = job.get("state", "scheduled" if job.get("enabled", True) else "paused")
         next_run = job.get("next_run_at", "?")
 
